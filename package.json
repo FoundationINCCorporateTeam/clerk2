@@ -1,0 +1,95 @@
+{
+  "name": "nextjs-fullstack-app-template",
+  "author": {
+    "name": "Jiří Hofman",
+    "url": "https://nextjs-fullstack-app-template-potato.vercel.app"
+  },
+  "description": "A template for creating a production-ready fullstack Next.js application with: React Bootstrap and Clerk using Cypress and GitHub Actions",
+  "displayName": "My Next App Template",
+  "version": "0.9.0",
+  "private": false,
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "dev": "next dev -p 4100",
+    "build": "next build",
+    "start": "next start -p 5100",
+    "lint": "next lint",
+    "prepare": "husky install",
+    "migrate:make": "knex migrate:make --esm",
+    "migrate:latest": "knex migrate:latest --esm",
+    "migrate:up": "knex migrate:up --esm",
+    "migrate:down": "knex migrate:down --esm",
+    "migrate:rollback-all": "knex migrate:rollback --all --esm",
+    "migrate:status": "knex migrate:status --esm",
+    "seed:create": "knex seed:make --esm",
+    "seed:run": "knex seed:run --esm",
+    "test": "npm run test:coverage:jest && npm run test:coverage:component && npm run test:coverage:e2e",
+    "test:jest": "jest --watch",
+    "test:build": "NODE_ENV=test next build",
+    "test:start": "NODE_ENV=test next start -p 5100",
+    "test:wait-on": "wait-on http://127.0.0.1:5100",
+    "test:cy:run": "CYPRESS_BASE_URL=http://localhost:5100 CYPRESS_NODE_ENV=test cypress run --browser chrome --env coverage=true",
+    "test:db:clear": "NODE_ENV=test npm run migrate:rollback-all",
+    "test:db:init": "NODE_ENV=test npm run migrate:latest && NODE_ENV=test npm run seed:run",
+    "test:ci": "npm run pretest && npm run test:coverage:jest && npm run test:coverage:component && npm run test:db:clear && npm run test:db:init && npm run test:build && npm run test:start & npm run test:wait-on && npm run test:cy:run && npm run posttest",
+    "pretest": "rm -rf coverage jest-coverage cypress-coverage .nyc_output || true",
+    "posttest": "npm run report:combined",
+    "mkdir:reports": "mkdir reports || true",
+    "test:coverage:prepare-folders": "npm run pretest && (mkdir .nyc_output || true) && (mkdir reports || true)",
+    "combine:reports": "npx nyc merge reports && mv coverage.json .nyc_output/out.json",
+    "prereport:combined": "npm run combine:reports",
+    "report:combined": "npx nyc report --reporter lcov --reporter text --report-dir coverage",
+    "test:coverage:jest": "NODE_ENV=test jest && cp jest-coverage/coverage-final.json reports/from-jest.json",
+    "test:coverage:component": "NODE_ENV=test cypress run --component --browser chrome --env coverage=true && cp cypress-coverage/coverage-final.json reports/from-cypress-component.json",
+    "test:coverage:e2e": "cypress run --browser chrome --env coverage=true && cp cypress-coverage/coverage-final.json reports/from-cypress.json"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^4.29.6",
+    "@prisma/client": "^5.7.0",
+    "@vercel/analytics": "^1.1.1",
+    "@vercel/postgres": "^0.5.1",
+    "bootstrap": "^5.3.2",
+    "lodash": "^4.17.21",
+    "next": "^14.0.4",
+    "next-intl": "^3.4.0",
+    "notiflix": "^3.2.6",
+    "react": "^18.2.0",
+    "react-bootstrap": "^2.10.0",
+    "react-bootstrap-icons": "^1.8.2",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.6",
+    "@commitlint/cli": "^18.4.2",
+    "@commitlint/config-conventional": "^18.4.3",
+    "@cypress/code-coverage": "^3.12.20",
+    "@types/react": "18.2.37",
+    "babel-loader": "^8.2.4",
+    "babel-plugin-istanbul": "^6.1.1",
+    "cypress": "^13.6.4",
+    "eslint": "8.12.0",
+    "eslint-config-next": "^14.0.4",
+    "eslint-plugin-cypress": "^2.12.1",
+    "eslint-plugin-jest": "^27.6.0",
+    "husky": "^8.0.3",
+    "jest": "latest",
+    "prisma": "^5.9.1",
+    "wait-on": "^7.2.0"
+  },
+  "nyc": {
+    "report-dir": "cypress-coverage",
+    "exclude": [
+      "pages/api/__coverage__.js",
+      "jest.setup.js",
+      "**/__tests__/**"
+    ]
+  },
+  "resolutions": {
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.0"
+  }
+}
